@@ -27,7 +27,6 @@ void setup() {
 }
 
 void draw() {
-  square(100, 100, 1000);
   textAlign(CENTER);  // Spécifie que le texte est centré par rapport aux coordonnées de dessin.
 
   background(255);
@@ -57,7 +56,7 @@ void draw() {
       } else {
         maison = "Lannister";
       }
-      text(dataFans.getFloat(cle, 1) + "% " + maison + " (" + cle + ")", x, y-25);
+      text(dataFans.getFloat(cle, 1) + "% " + maison + " (" + cle + ")", x, y-30);
     }
   }
 }
