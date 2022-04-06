@@ -43,6 +43,7 @@ void setup() {
 }
 
 void draw() {
+
   background(255);
   smooth();
   float gaucheX = 160;
@@ -62,33 +63,30 @@ void draw() {
   int startPos = width/10;
   int endPos = startPos + (182*interval);    //182 jours entre début avril et fin septembre 2007
   DateFormat formatJour = new SimpleDateFormat("EEEE");
+  long dateStart = 11753784;
+  long dateEnd = 11911032;
   for(int i = startPos; i < endPos; i+=interval) {
-    String txtJour = formatJour.format(map(i, startPos, endPos, 11753784, 11911032)*100000);    // récupère  le texte a afficher
+    String txtJour = formatJour.format(map(i, startPos, endPos, dateStart, dateEnd)*100000);    // récupère  le texte a afficher
       DateFormat niceDate = new SimpleDateFormat("d MMM yyyy");
     
-    if(selectedDate == (long)map(i, startPos, endPos, 11753784, 11911032)*100000) {              // affichage texte de la date sélectionné
+    if(selectedDate == (long)map(i, startPos, endPos, dateStart, dateEnd)*100000) {              // affichage texte de la date sélectionné
       fill(0, 0, 0);
       strokeWeight(2);
       line(i, 10, i, 25);
-      text(txtJour + " " + niceDate.format(map(i, startPos, endPos, 11753784, 11911032)*100000), i-20, 30);  //20070401, 20070931 début avril à fin septembre en millisecondes
+      text(txtJour + " " + niceDate.format(map(i, startPos, endPos, dateStart, dateEnd)*100000), i-20, 30);  //20070401, 20070931 début avril à fin septembre en millisecondes
     }
     
     if(mouseY < 20 && mouseY > 10 && mouseX > i - interval && mouseX < i + (interval/2)) {        // affichage texte quand la souris est au dessus de la timeline
       strokeWeight(2);
-      hoverRectPos = i-25;
-      if(txtJour.equals("samedi") || txtJour.equals("dimanche")) {                                // texte en rouge si c'est le weekend
-        fill(255, 0, 0);
-        hoverColor = color(255, 0, 0);
-      } else {                                                                                    // en bleu pour le reste
-        fill(0, 0, 255);
-        hoverColor = color(0, 0, 255);
-          if(mousePressed) {                                                                      // s'occupe de set la data cliquée
-          selectedDate = (long)map(i, startPos, endPos, 11753784, 11911032)*100000;
-          setupClassements();
-        }
+      hoverRectPos = i-25;                                                                                // en bleu pour le reste
+      fill(0, 0, 255);
+      hoverColor = color(0, 0, 255);
+        if(mousePressed) {                                                                      // s'occupe de set la data cliquée
+        selectedDate = (long)map(i, startPos, endPos, dateStart, dateEnd)*100000;
+        setupClassements();
       }
       line(i, 10, i, 25);
-      hoverDateTxt = txtJour + " " + niceDate.format(map(i, startPos, endPos, 11753784, 11911032)*100000);    //20070401, 20070931 début avril à fin septembre en millisecondes
+      hoverDateTxt = txtJour + " " + niceDate.format(map(i, startPos, endPos, dateStart, dateEnd)*100000);    //20070401, 20070931 début avril à fin septembre en millisecondes
       hoverDateX = i-20;
       hoverDateY = 30;
   } else {
@@ -202,6 +200,8 @@ String[] chargerClassements(int annee, int mois, int jour) {
 
 void lireClassements(String fichier, PrintWriter writer) {
     String[] lignes = loadStrings(fichier);
+    println(lignes);
+    println(lignes.length);
     String code = "";
     int wins = 0;
     int losses = 0;
