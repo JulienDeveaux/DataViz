@@ -1,4 +1,4 @@
-PImage carte; //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+PImage carte; //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
 Table[] dataTable;
 int displayMode = 0;
 int tour = 1;
@@ -128,16 +128,16 @@ void legende(String[] participants, color[] colors, int startingX, int startingY
   rectMode(CENTER);
   fill(200, 200, 200);
   for (int i = 0, j = 0; i < participants.length; i++, j+=20) {    //Draw grey rects first
-    rect(startingX, startingY+j, 100, 25);
+    rect(startingX, startingY+j, 110, 25);
   }
-  fill(0, 0, 0);
   float[] pourcentage = new float[1];
   pourcentage[0] = 100;
   for (int i = 0, j = 2; i < participants.length; i++, j+=20) {
     color[] currentColor = new color[1];
     currentColor[0] = colors[i];
-    cheese(pourcentage, startingX-25, startingY+j-4, currentColor, 8, "");
-    text(participants[i], startingX + 8, startingY+j);
+    cheese(pourcentage, startingX-35, startingY+j-4, currentColor, 8, "");
+    fill(0, 0, 0);
+    text(participants[i], startingX + 15, startingY+j);
   }
 }
 
