@@ -1,4 +1,4 @@
-PImage carte; //<>// //<>// //<>//
+ PImage carte; //<>//
 Table[] dataTable;
 int displayMode = 0;
 int tour = 1;
