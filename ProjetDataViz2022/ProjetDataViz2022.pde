@@ -1,4 +1,4 @@
- PImage carte; //<>//
+PImage carte; //<>//
 Table[] dataTable;
 int displayMode = 0;
 int tour = 1;
@@ -10,6 +10,8 @@ String[][] regDataT2;
 color[] colorsT2;
 boolean drawLegend = true;
 float prevRadian = 0;    //for partyMode -> to Delete
+Integrator[] interpDept;
+Integrator[] interpReg;
 
 void setup() {
   size(1138, 1080);
@@ -40,6 +42,12 @@ void setup() {
   dataTable[1] = regionTable;
 
   getData();
+  
+  interpDept = new Integrator[deptTable.getRowCount()];
+  for (int ligne = 0; ligne < deptTable.getRowCount(); ligne++) {
+    interpDept[ligne] = new Integrator(0, 0.9, 0.2);
+    interpDept[ligne].target(0);
+  }
 }
 
 void draw() {
@@ -73,9 +81,31 @@ void draw() {
         int x = dataTable[displayMode].getInt(i, 2);
         int y = dataTable[displayMode].getInt(i, 3);
         int taille = dataTable[displayMode].getInt(i, 4);
+
+        String code = dataTable[displayMode].getString(i, 0);
+        if (int(code) <= 9 && !code.equals("2A") && !code.equals("2B")) {
+          code = "0" + code;
+        }
+        if (code.equals("971")) {      //cas Gadeloupe
+          code = "ZA";
+        } else if (code.equals("972")) {  //cas Martinique
+          code = "ZB";
+        } else if (code.equals("973")) {  //cas Guyanne
+          code = "ZC";
+        } else if (code.equals("974")) {  //cas La Réunion
+          code = "ZD";
+        } else if (code.equals("976")) {  //cas Mayotte
+          code = "ZM";
+        }
+        String[] resRow = new String[deptDataT1[0].length];
+        for (int j = 0; j < deptDataT1.length; j++) {
+          if (deptDataT1[j][0].equals(code)) {
+            resRow = deptDataT1[j];
+          }
+        }
         float[] pourcentages = new float[12];
         for (int j = 0, iterator = 0; j < deptDataT1[i+1].length - 22; j+=6, iterator++) {
-          pourcentages[iterator] = float(deptDataT1[i+1][22+j].replace(",", "."));
+          pourcentages[iterator] = float(resRow[22+j].replace(",", "."));
         }
         cheese(pourcentages, x, y, colorsT1, taille, nom, participants);
       }
@@ -84,10 +114,11 @@ void draw() {
         String nom = dataTable[displayMode].getString(i, 0);
         int x = dataTable[displayMode].getInt(i, 1);
         int y = dataTable[displayMode].getInt(i, 2);
-        int taille = int(dataTable[displayMode].getInt(i, 3) *1);
+        int taille = int(dataTable[displayMode].getInt(i, 3));
+
         float[] pourcentages = new float[12];
-        for (int j = 0, iterator = 0; j < regDataT1[i+1].length - 22; j+=6, iterator++) {
-          pourcentages[iterator] = float(regDataT1[i+1][22+j].replace(",", "."));
+        for (int j = 0, iterator = 0; j < regDataT1[i].length - 22; j+=6, iterator++) {
+          pourcentages[iterator] = float(regDataT1[i][22+j].replace(",", "."));
         }
         cheese(pourcentages, x, y, colorsT1, taille, nom, participants);
       }
@@ -103,9 +134,31 @@ void draw() {
         int x = dataTable[displayMode].getInt(i, 2);
         int y = dataTable[displayMode].getInt(i, 3);
         int taille = dataTable[displayMode].getInt(i, 4);
+
+        String code = dataTable[displayMode].getString(i, 0);
+        if (int(code) <= 9 && !code.equals("2A") && !code.equals("2B")) {
+          code = "0" + code;
+        }
+        if (code.equals("971")) {      //cas Gadeloupe
+          code = "ZA";
+        } else if (code.equals("972")) {  //cas Martinique
+          code = "ZB";
+        } else if (code.equals("973")) {  //cas Guyanne
+          code = "ZC";
+        } else if (code.equals("974")) {  //cas La Réunion
+          code = "ZD";
+        } else if (code.equals("976")) {  //cas Mayotte
+          code = "ZM";
+        }
+        String[] resRow = new String[deptDataT2[0].length];
+        for (int j = 0; j < deptDataT1.length; j++) {
+          if (deptDataT2[j][0].equals(code)) {
+            resRow = deptDataT2[j];
+          }
+        }
         float[] pourcentages = new float[2];
         for (int j = 0, iterator = 0; j < deptDataT2[i+1].length - 22; j+=6, iterator++) {
-          pourcentages[iterator] = float(deptDataT2[i+1][22+j].replace(",", "."));
+          pourcentages[iterator] = float(resRow[22+j].replace(",", "."));
         }
         cheese(pourcentages, x, y, colorsT2, taille, nom, participants);
       }
@@ -116,8 +169,8 @@ void draw() {
         int y = dataTable[displayMode].getInt(i, 2);
         int taille = int(dataTable[displayMode].getInt(i, 3) *1);
         float[] pourcentages = new float[2];
-        for (int j = 0, iterator = 0; j < regDataT2[i+1].length - 22; j+=6, iterator++) {
-          pourcentages[iterator] = float(regDataT2[i+1][22+j].replace(",", "."));
+        for (int j = 0, iterator = 0; j < regDataT2[i].length - 22; j+=6, iterator++) {
+          pourcentages[iterator] = float(regDataT2[i][22+j].replace(",", "."));
         }
         cheese(pourcentages, x, y, colorsT2, taille, nom, participants);
       }
@@ -184,54 +237,41 @@ void cheese(float[] data, int x, int y, color[] colors, int taille, String nom, 
 }
 
 void getData() {
-  File dataPremier = new File("data/permierTour.txt");
-  File dataSecond = new File("data/secondTour.txt");
-  if (!dataPremier.exists() || !dataSecond.exists()) {
-    PrintWriter writerOne = createWriter(dataPath("permierTour.txt"));
-    PrintWriter writerTwo = createWriter(dataPath("secondTour.txt"));
+  //Tour 1
 
-    //Tour 1
-
-    String[] dataDeptT1 = loadStrings("https://www.data.gouv.fr/fr/datasets/r/8b4d68f6-4490-4afc-b632-6c259073a4b9");
-    ArrayList<String[]> linesDeptT1 = new ArrayList<String[]>();
-    for (int i = 0; i < dataDeptT1.length; i++) {
-      linesDeptT1.add(dataDeptT1[i].split(";"));
-    }
-    deptDataT1 = new String[linesDeptT1.size()][0];
-    linesDeptT1.toArray(deptDataT1);
-
-    String[] dataRegtT1 = loadStrings("https://www.data.gouv.fr/fr/datasets/r/cbf026c5-e0bf-4ff8-b1cd-eb994cd26290");
-    ArrayList<String[]> linesRegtT1 = new ArrayList<String[]>();
-    for (int i = 0; i < dataRegtT1.length; i++) {
-      linesRegtT1.add(dataRegtT1[i].split(";"));
-    }
-    regDataT1 = new String[linesRegtT1.size()][0];
-    linesRegtT1.toArray(regDataT1);
-
-    //Tour 2
-
-    String[] dataDeptT2 = loadStrings("https://www.data.gouv.fr/fr/datasets/r/8986f174-d47e-46e5-a499-5d352d9422b3");
-    ArrayList<String[]> linesDeptT2 = new ArrayList<String[]>();
-    for (int i = 0; i < dataDeptT2.length; i++) {
-      linesDeptT2.add(dataDeptT2[i].split(";"));
-    }
-    deptDataT2 = new String[linesDeptT2.size()][0];
-    linesDeptT2.toArray(deptDataT2);
-
-    String[] dataRegtT2 = loadStrings("https://www.data.gouv.fr/fr/datasets/r/1b508d3b-997a-4f7f-95ce-e4ada06d97ff");
-    ArrayList<String[]> linesRegtT2 = new ArrayList<String[]>();
-    for (int i = 0; i < dataRegtT2.length; i++) {
-      linesRegtT2.add(dataRegtT2[i].split(";"));
-    }
-    regDataT2 = new String[linesRegtT2.size()][0];
-    linesRegtT2.toArray(regDataT2);
-    writerOne.flush();          //TODO écrire dans les fichiers (on a les données que du premier tour la
-    writerOne.close();
-    writerTwo.flush();
-    writerTwo.close();
-  } else {
-    //read files
+  String[] dataDeptT1 = loadStrings("https://www.data.gouv.fr/fr/datasets/r/8b4d68f6-4490-4afc-b632-6c259073a4b9");
+  ArrayList<String[]> linesDeptT1 = new ArrayList<String[]>();
+  for (int i = 0; i < dataDeptT1.length; i++) {
+    linesDeptT1.add(dataDeptT1[i].split(";"));
   }
+  deptDataT1 = new String[linesDeptT1.size()][0];
+  linesDeptT1.toArray(deptDataT1);
+
+  String[] dataRegtT1 = loadStrings("https://www.data.gouv.fr/fr/datasets/r/cbf026c5-e0bf-4ff8-b1cd-eb994cd26290");
+  ArrayList<String[]> linesRegtT1 = new ArrayList<String[]>();
+  for (int i = 0; i < dataRegtT1.length; i++) {
+    linesRegtT1.add(dataRegtT1[i].split(";"));
+  }
+  regDataT1 = new String[linesRegtT1.size()][0];
+  linesRegtT1.toArray(regDataT1);
+
+  //Tour 2
+
+  String[] dataDeptT2 = loadStrings("https://www.data.gouv.fr/fr/datasets/r/8986f174-d47e-46e5-a499-5d352d9422b3");
+  ArrayList<String[]> linesDeptT2 = new ArrayList<String[]>();
+  for (int i = 0; i < dataDeptT2.length; i++) {
+    linesDeptT2.add(dataDeptT2[i].split(";"));
+  }
+  deptDataT2 = new String[linesDeptT2.size()][0];
+  linesDeptT2.toArray(deptDataT2);
+
+  String[] dataRegtT2 = loadStrings("https://www.data.gouv.fr/fr/datasets/r/1b508d3b-997a-4f7f-95ce-e4ada06d97ff");
+  ArrayList<String[]> linesRegtT2 = new ArrayList<String[]>();
+  for (int i = 0; i < dataRegtT2.length; i++) {
+    linesRegtT2.add(dataRegtT2[i].split(";"));
+  }
+  regDataT2 = new String[linesRegtT2.size()][0];
+  linesRegtT2.toArray(regDataT2);
 }
 
 void keyPressed() {
