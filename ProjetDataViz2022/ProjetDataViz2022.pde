@@ -1,17 +1,19 @@
-PImage carte; //<>//
+PImage carte; //<>// //<>// //<>//
 Table[] dataTable;
 int displayMode = 0;
 int tour = 1;
 String[][] deptDataT1;
 String[][] regDataT1;
 color[] colorsT1;
+String[] participantsT1;
 String[][] deptDataT2;
 String[][] regDataT2;
 color[] colorsT2;
+String[] participantsT2;
 boolean drawLegend = true;
 float prevRadian = 0;    //for partyMode -> to Delete
-Integrator[] interpDept;
-Integrator[] interpReg;
+Cheese[] regCheeses;
+Cheese[] deptCheeses;
 
 void setup() {
   size(1138, 1080);
@@ -32,6 +34,22 @@ void setup() {
   colorsT2 = new color[2];
   colorsT2[0] = color(255, 100, 100);
   colorsT2[1] = color(100, 100, 255);
+  participantsT1 = new String[12];
+  participantsT1[0] = "Arthaud";
+  participantsT1[1] = "Roussel";
+  participantsT1[2] = "Macron";
+  participantsT1[3] = "Lassalle";
+  participantsT1[4] = "Le Pen";
+  participantsT1[5] = "Zemmour";
+  participantsT1[6] = "Melenchon";
+  participantsT1[7] = "Hidalgo";
+  participantsT1[8] = "Jadot";
+  participantsT1[9] = "Pecresse";
+  participantsT1[10] = "Poutou";
+  participantsT1[11] = "Dupont-Aignan";
+  participantsT2 = new String[2];
+  participantsT2[0] = "Macron";
+  participantsT2[1] = "Le Pen";
 
   carte = loadImage("France_départementale.png");
 
@@ -42,11 +60,41 @@ void setup() {
   dataTable[1] = regionTable;
 
   getData();
+
+
+  float[] initdataT1 = new float[12];
+  initdataT1[0] = 0;
+  initdataT1[1] = 0;
+  initdataT1[2] = 0;
+  initdataT1[3] = 0;
+  initdataT1[4] = 0;
+  initdataT1[5] = 0;
+  initdataT1[6] = 0;
+  initdataT1[7] = 0;
+  initdataT1[8] = 0;
+  initdataT1[9] = 0;
+  initdataT1[10] = 0;
+  initdataT1[11] = 0;
+  deptCheeses = new Cheese[dataTable[0].getRowCount()];
+  for (int i = 0; i < dataTable[0].getRowCount(); i++) {
+    String nom = dataTable[0].getString(i, 1);
+    int x = dataTable[0].getInt(i, 2);
+    int y = dataTable[0].getInt(i, 3);
+    int taille = dataTable[0].getInt(i, 4);
+
+    deptCheeses[i] = new Cheese(x, y, taille, nom, participantsT1, colorsT1);
+    deptCheeses[i].setData(initdataT1);
+  }
   
-  interpDept = new Integrator[deptTable.getRowCount()];
-  for (int ligne = 0; ligne < deptTable.getRowCount(); ligne++) {
-    interpDept[ligne] = new Integrator(0, 0.9, 0.2);
-    interpDept[ligne].target(0);
+  regCheeses = new Cheese[dataTable[1].getRowCount()];
+  for (int i = 0; i < dataTable[1].getRowCount(); i++) {
+    String nom = dataTable[1].getString(i, 0);
+    int x = dataTable[1].getInt(i, 1);
+    int y = dataTable[1].getInt(i, 2);
+    int taille = int(dataTable[1].getInt(i, 3));
+
+    regCheeses[i] = new Cheese(x, y, taille, nom, participantsT1, colorsT1);
+    regCheeses[i].setData(initdataT1);
   }
 }
 
@@ -61,27 +109,9 @@ void draw() {
   fill(192, 0, 0);
   noStroke();
   if (tour == 1) {
-    String[] participants = new String[12];
-    participants[0] = "Arthaud";
-    participants[1] = "Roussel";
-    participants[2] = "Macron";
-    participants[3] = "Lassalle";
-    participants[4] = "Le Pen";
-    participants[5] = "Zemmour";
-    participants[6] = "Melenchon";
-    participants[7] = "Hidalgo";
-    participants[8] = "Jadot";
-    participants[9] = "Pecresse";
-    participants[10] = "Poutou";
-    participants[11] = "Dupont-Aignan";
-    legende(participants, colorsT1, 65, 30);
+    legende(participantsT1, colorsT1, 65, 30);
     if (displayMode == 0) {    //départements
       for (int i = 1; i < dataTable[displayMode].getRowCount(); i++) {
-        String nom = dataTable[displayMode].getString(i, 1);
-        int x = dataTable[displayMode].getInt(i, 2);
-        int y = dataTable[displayMode].getInt(i, 3);
-        int taille = dataTable[displayMode].getInt(i, 4);
-
         String code = dataTable[displayMode].getString(i, 0);
         if (int(code) <= 9 && !code.equals("2A") && !code.equals("2B")) {
           code = "0" + code;
@@ -107,34 +137,21 @@ void draw() {
         for (int j = 0, iterator = 0; j < deptDataT1[i+1].length - 22; j+=6, iterator++) {
           pourcentages[iterator] = float(resRow[22+j].replace(",", "."));
         }
-        cheese(pourcentages, x, y, colorsT1, taille, nom, participants);
+        deptCheeses[i].setParticipants(participantsT1).setData(pourcentages).drawCheese();
       }
     } else {                  //régions
       for (int i = 1; i < dataTable[displayMode].getRowCount(); i++) {
-        String nom = dataTable[displayMode].getString(i, 0);
-        int x = dataTable[displayMode].getInt(i, 1);
-        int y = dataTable[displayMode].getInt(i, 2);
-        int taille = int(dataTable[displayMode].getInt(i, 3));
-
         float[] pourcentages = new float[12];
         for (int j = 0, iterator = 0; j < regDataT1[i].length - 22; j+=6, iterator++) {
           pourcentages[iterator] = float(regDataT1[i][22+j].replace(",", "."));
         }
-        cheese(pourcentages, x, y, colorsT1, taille, nom, participants);
+        regCheeses[i].setParticipants(participantsT1).setData(pourcentages).drawCheese();
       }
     }
   } else {
-    String[] participants = new String[2];
-    participants[0] = "Macron";
-    participants[1] = "Le Pen";
-    legende(participants, colorsT2, 65, 30);
+    legende(participantsT2, colorsT2, 65, 30);
     if (displayMode == 0) {    //départements
       for (int i = 1; i < dataTable[displayMode].getRowCount(); i++) {
-        String nom = dataTable[displayMode].getString(i, 1);
-        int x = dataTable[displayMode].getInt(i, 2);
-        int y = dataTable[displayMode].getInt(i, 3);
-        int taille = dataTable[displayMode].getInt(i, 4);
-
         String code = dataTable[displayMode].getString(i, 0);
         if (int(code) <= 9 && !code.equals("2A") && !code.equals("2B")) {
           code = "0" + code;
@@ -160,19 +177,15 @@ void draw() {
         for (int j = 0, iterator = 0; j < deptDataT2[i+1].length - 22; j+=6, iterator++) {
           pourcentages[iterator] = float(resRow[22+j].replace(",", "."));
         }
-        cheese(pourcentages, x, y, colorsT2, taille, nom, participants);
+        deptCheeses[i].setParticipants(participantsT2).setData(pourcentages).drawCheese();
       }
     } else {                  //régions
       for (int i = 1; i < dataTable[displayMode].getRowCount(); i++) {
-        String nom = dataTable[displayMode].getString(i, 0);
-        int x = dataTable[displayMode].getInt(i, 1);
-        int y = dataTable[displayMode].getInt(i, 2);
-        int taille = int(dataTable[displayMode].getInt(i, 3) *1);
         float[] pourcentages = new float[2];
         for (int j = 0, iterator = 0; j < regDataT2[i].length - 22; j+=6, iterator++) {
           pourcentages[iterator] = float(regDataT2[i][22+j].replace(",", "."));
         }
-        cheese(pourcentages, x, y, colorsT2, taille, nom, participants);
+        regCheeses[i].setParticipants(participantsT2).setData(pourcentages).drawCheese();
       }
     }
   }
@@ -185,18 +198,20 @@ void legende(String[] participants, color[] colors, int startingX, int startingY
     for (int i = 0, j = 0; i < participants.length; i++, j+=20) {    //Draw grey rects first
       rect(startingX, startingY+j, 110, 25);
     }
-    float[] pourcentage = new float[1];
-    pourcentage[0] = 100;
-    String[] participantNone = new String[0];
     for (int i = 0, j = 2; i < participants.length; i++, j+=20) {    //Draw participants
-      color[] currentColor = new color[1];
-      currentColor[0] = colors[i];
-      cheese(pourcentage, startingX-35, startingY+j-4, currentColor, 8, "", participantNone);
+      color currentColor = colors[i];
+      drawCircle(startingX-35, startingY+j-4, currentColor, 8);
       fill(0, 0, 0);
       text(participants[i], startingX + 15, startingY+j);
     }
   }
 }
+
+void drawCircle(int x, int y, color colors, int taille) {    //small circle with some data
+    fill(colors);
+    circle(x, y, taille);
+}
+
 
 void legende(String[] participants, color[] colors, int startingX, int startingY, float[] pourcentages) {
   rectMode(CENTER);
@@ -204,35 +219,11 @@ void legende(String[] participants, color[] colors, int startingX, int startingY
   for (int i = 0, j = 0; i < participants.length; i++, j+=20) {    //Draw grey rects first
     rect(startingX, startingY+j, 120, 25);
   }
-
-  float[] pourcentage = new float[1];
-  pourcentage[0] = 100;
-  String[] participantNone = new String[0];
   for (int i = 0, j = 2; i < participants.length; i++, j+=20) {    //Draw participants + pourcentages
-    color[] currentColor = new color[1];
-    currentColor[0] = colors[i];
-    cheese(pourcentage, startingX-65, startingY+j-4, currentColor, 8, "", participantNone);
+    color currentColor = colors[i];
+    drawCircle(startingX-65, startingY+j-4, currentColor, 8);
     fill(0, 0, 0);
     text(participants[i] + " " + pourcentages[i] + " %", startingX + 0, startingY+j);
-  }
-}
-
-void cheese(float[] data, int x, int y, color[] colors, int taille, String nom, String[] participants) {
-  float prevRadian = 0;      //remove to engage partyMode
-  for (int i = 0; i < data.length; i++) {
-    float degre = data[i]*3.6;
-    float radian = radians(degre) + prevRadian;
-    fill(colors[i]);
-    arc(x, y, taille, taille, prevRadian, radian, PIE);
-    prevRadian = radian;
-    if (mouseX < x + taille/2 && mouseX > x - taille/2 && mouseY > y - taille/2 && mouseY < y + taille/2) {  //TODO legende jolie avec détails au dessus de l'autre en haut à gauche
-      drawLegend = false;
-      fill(0, 0, 0);
-      text("résultats de " + nom + " : ", 75, 10);
-      legende(participants, colors, 90, 30, data);
-    } else {
-      drawLegend = true;
-    }
   }
 }
 
