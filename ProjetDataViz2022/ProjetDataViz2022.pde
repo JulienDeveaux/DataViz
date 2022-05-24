@@ -156,7 +156,7 @@ void draw() {
         if (int(code) <= 9 && !code.equals("2A") && !code.equals("2B")) {
           code = "0" + code;
         }
-        if (code.equals("971")) {      //cas Gadeloupe
+        if (code.equals("971")) {         //cas Gadeloupe
           code = "ZA";
         } else if (code.equals("972")) {  //cas Martinique
           code = "ZB";

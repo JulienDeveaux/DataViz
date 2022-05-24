@@ -42,7 +42,7 @@ class Cheese {
     } else {
       this.interp = new Integrator[data.length];
       for (int ligne = 0; ligne < data.length; ligne++) {
-        this.interp[ligne] = new Integrator(data[ligne]/2, 0.9, 0.6);
+        this.interp[ligne] = new Integrator(data[ligne]/2, 0.9, 0.4);
         this.interp[ligne].target(data[ligne]);
       }
       this.data = data;
@@ -52,23 +52,23 @@ class Cheese {
   }
 
   public void drawCheese() {
-    for (int i = 0; i < data.length; i++) {
-      interp[i].update();
-    }
-    prevRadian = 0;
-    fill(200, 200, 200);
-    circle(x, y, taille);
-    for (int i = 0; i < data.length; i++) {
-      if (mouseX < x + taille/2 && mouseX > x - taille/2 && mouseY > y - taille/2 && mouseY < y + taille/2) {  //TODO legende jolie avec détails au dessus de l'autre en haut à gauche
+    if (mouseX < x + taille/2 && mouseX > x - taille/2 && mouseY > y - taille/2 && mouseY < y + taille/2) {
+      for (int i = 0; i < data.length; i++) {
+        interp[i].update();
+      }
+      prevRadian = 0;
+      fill(200, 200, 200);
+      circle(x, y, taille);
+      for (int i = 0; i < data.length; i++) {
         fill(0, 0, 0);
         text("résultats de " + nom + " : ", 75, 10);
         legende(participants, colors, 90, 30, data);
+        float degre = interp[i].value*3.6;
+        float radian = radians(degre) + prevRadian;
+        fill(colors[i]);
+        arc(x, y, taille, taille, prevRadian, radian, PIE);
+        prevRadian = radian;
       }
-      float degre = interp[i].value*3.6;
-      float radian = radians(degre) + prevRadian;
-      fill(colors[i]);
-      arc(x, y, taille, taille, prevRadian, radian, PIE);
-      prevRadian = radian;
     }
   }
 }
