@@ -58,7 +58,11 @@ class Cheese {
       }
       prevRadian = 0;
       fill(200, 200, 200);
-      circle(x, y, taille);
+      circle(mouseX<(width-height/4)?(mouseX+150):(mouseX-150), mouseY<(height-height/4)?(mouseY+100):(mouseY-100), 200);
+      fill(200, 200, 200);
+      rect(mouseX<(width-height/4)?(mouseX+150):(mouseX-150), mouseY<(height-height/4)?mouseY-20:mouseY+20, 150, 25);
+      fill(0, 0, 0);
+      text(nom, mouseX<(width-height/4)?(mouseX+150):(mouseX-150), mouseY<(height-height/4)?mouseY-20+5:mouseY+20+5);
       for (int i = 0; i < data.length; i++) {
         fill(0, 0, 0);
         text("résultats de " + nom + " : ", 75, 10);
@@ -66,7 +70,7 @@ class Cheese {
         float degre = interp[i].value*3.6;
         float radian = radians(degre) + prevRadian;
         fill(colors[i]);
-        arc(x, y, taille, taille, prevRadian, radian, PIE);
+        arc(mouseX<(width-height/4)?(mouseX+150):(mouseX-150), mouseY<(height-height/4)?(mouseY+100):(mouseY-100), 200, 200, prevRadian, radian, PIE);
         prevRadian = radian;
       }
     }

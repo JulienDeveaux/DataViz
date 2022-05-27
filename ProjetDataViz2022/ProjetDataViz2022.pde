@@ -1,4 +1,4 @@
-PImage carte; //<>// //<>// //<>//
+PImage carte; //<>//
 Table[] dataTable;
 int displayMode = 0;
 int tour = 1;
@@ -11,7 +11,6 @@ String[][] regDataT2;
 color[] colorsT2;
 String[] participantsT2;
 boolean drawLegend = true;
-float prevRadian = 0;    //for partyMode -> to Delete
 Cheese[] regCheeses;
 Cheese[] deptCheeses;
 
@@ -96,6 +95,7 @@ void setup() {
     regCheeses[i] = new Cheese(x, y, taille, nom, participantsT1, colorsT1);
     regCheeses[i].setData(initdataT1);
   }
+  println("clic de souris pour changer de vue entre le 1er et 2ème tour et appui d'une touche pour changer de la vue entre région et département");
 }
 
 void draw() {
@@ -188,6 +188,17 @@ void draw() {
         regCheeses[i].setParticipants(participantsT2).setData(pourcentages).drawCheese();
       }
     }
+  }
+  rectMode(CENTER);
+  fill(200, 200, 200);
+  if(displayMode == 0) {        // on affiche un indicateur département
+    rect(width/2, height/25, 150, 25);
+    fill(0, 0, 0);
+    text("Affichage par départements", width/2+5, height/25+5);
+  } else {                      // on affiche un indicateur région
+    rect(width/2, height/25, 150, 25);
+    fill(0, 0, 0);
+    text("Affichage par régions", width/2+5, height/25+5);
   }
 }
 
